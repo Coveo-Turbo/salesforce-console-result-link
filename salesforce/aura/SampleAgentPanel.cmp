@@ -1,0 +1,30 @@
+<aura:component implements="force:hasRecordId,force:hasSObjectName,flexipage:availableForRecordHome" access="global">
+    <aura:attribute name="name" type="String" access="global" />
+    <aura:attribute name="searchHub" type="String" access="global" />
+    <aura:attribute name="title" type="String" access="global" />
+    <aura:attribute name="recordFields" type="String" access="global" />
+    <aura:attribute name="openResultsInSubTab" type="Boolean" default="false" access="global" />
+    <aura:attribute name="fullSearchComponent" default="" type="String" access="global" />
+    <aura:attribute name="debug" type="Boolean" default="false" access="global" />
+
+    <!--Adds necessary bridge for SalesforceConsoleResultLink-->
+    <lightning:workspaceAPI aura:id="workspaceAPI" />
+    <aura:handler name="init" value="{!this}" action="{!c.init}" />
+
+    <!-- Uncomment this if you add styles -->
+    <!-- <ltng:require styles="{!$Resource.StyledInsightPanel + '/index.min.css'}"/> -->
+
+    <CoveoV2:AgentPanel
+        aura:id="AgentInsightPanel"
+        recordId="{!v.recordId}"
+        sObjectName="{!v.sObjectName}"
+        name="{!v.name}"
+        searchHub="{!v.searchHub}"
+        title="{!v.title}"
+        recordFields="{!v.recordFields}"
+        openResultsInSubTab="{!v.openResultsInSubTab}"
+        fullSearchComponent="{!v.fullSearchComponent}"
+        debug="{!v.debug}"       
+        customScripts="{!$Resource.StyledInsightPanel + '/index.min.js'}"
+    />
+</aura:component>
