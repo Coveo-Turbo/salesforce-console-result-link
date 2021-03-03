@@ -3,6 +3,7 @@ import { component, requiresFields } from '@coveops/turbo-core';
 import { ResultLinkTarget } from './enum';
 import { TabOpenerStrategyResolver } from './resolver';
 import { ISalesforceTabOpenerStrategy } from './strategies';
+import * as ConfigureQuickviewHeader from '@coveops/configure-quickview-header'
 
 export interface ISalesforceConsoleResultLinkOptions extends IResultLinkOptions {
     hrefTemplate?: string;
@@ -12,6 +13,8 @@ export interface ISalesforceConsoleResultLinkOptions extends IResultLinkOptions 
     openInPrimaryTab?: boolean;
     openInSubTab?: boolean;
     workspaceAPI?: Aura.WorkspaceAPI;
+
+    applyToQuickviews?: boolean;
 }
 
 @requiresFields(...SalesforceConsoleResultLink.fields)
@@ -113,12 +116,18 @@ export class SalesforceConsoleResultLink extends ResultLink {
         alwaysOpenInNewWindow: ComponentOptions.buildBooleanOption({ defaultValue: true }),
 
         workspaceAPI: ComponentOptions.buildCustomOption(() => null, { defaultValue: null, required: true }),
+
+        applyToQuickviews: ComponentOptions.buildBooleanOption(),
     };
 
     static fields = ['sfkbid', 'sfkavid', 'sfid'];
 
     constructor(public element: HTMLElement, public options: ISalesforceConsoleResultLinkOptions, public bindings: IResultsComponentBindings, public result: IQueryResult) {
         super(element, ComponentOptions.initComponentOptions(element, SalesforceConsoleResultLink, options), bindings, result);
+
+        if (this.options.applyToQuickviews) {
+            this.adjustQuickviews();
+        }
     }
 
     protected bindEventToOpen() {
@@ -166,5 +175,15 @@ export class SalesforceConsoleResultLink extends ResultLink {
         }
 
         return ResultLinkTarget.newWindow;
+    }
+
+    protected adjustQuickviews() {
+        ConfigureQuickviewHeader({
+            resultLinkClass: 'SalesforceConsoleResultLink',
+            resultLinkOptions: {
+                applyToQuickviews: false,
+                ...this.options,
+            }
+        });
     }
 }

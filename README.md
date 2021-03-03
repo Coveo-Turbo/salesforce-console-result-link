@@ -70,6 +70,12 @@ To open items in a new browser tab:
 <div class="CoveoSalesforceConsoleResultLink" data-open-in-primary-tab="false"></div>
 ```
 
+To replace the ResultLink in Quickview headers as well:
+
+```html
+<a class="CoveoSalesforceConsoleResultLink" data-open-in-sub-tab="true" data-apply-to-quickviews="true"></a>
+```
+
 ## Options 
 
 | Field | Type | Default | Description |
@@ -81,6 +87,7 @@ To open items in a new browser tab:
 | openInSubTab | boolean | false | Specifies whether the result link should open within the sub tabs of the Salesforce console within an open Salesforce record. |
 | alwaysOpenInNewWindow | boolean | true | Specifies whether the result link should open in a new browser tab. This option only applies if the environment isn't compatible with the workforceAPI or the `openInPrimaryTab` option is set to `false`. |
 | workspaceAPI | workspaceAPI |  | The Salesforce workspaceAPI must be passed to the component at initialization. If it is not, the component will fallback to the `ResultLink` |
+| applyToQuickviews | boolean | false | Specifies whether the ResultLink in Quickview headers should be replaced with the `SalesforceConsoleResultLink` |
 
 ## Installation in Salesforce
 
