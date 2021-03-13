@@ -46,12 +46,6 @@ export class SalesforceRecordTabOpenerStrategy implements ISalesforceTabOpenerSt
     }
 
     protected getResultSfId(): string {
-        let idToUse = this.result.raw.sfid;
-        
-        if (this.result.raw.sfkbid && this.result.raw.sfkavid) {
-            idToUse = this.result.raw.sfkavid;
-        }
-
-        return idToUse || '';
+        return this.result.raw.sfid || '';
     }
 }

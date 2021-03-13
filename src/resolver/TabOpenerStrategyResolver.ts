@@ -13,6 +13,10 @@ export class TabOpenerStrategyResolver {
     constructor(protected workspaceAPI) {}
 
     resolve(result: IQueryResult, options: ITabOpenerOptions): ISalesforceTabOpenerStrategy {
+        if (!this.workspaceAPI) {
+            throw new Error('ConsoleResultLink: workspaceAPI is null, binding ResultLink open instead.');
+        }
+
         if (this.isSalesforceItem(result)) {
             return new SalesforceRecordTabOpenerStrategy(this.workspaceAPI, result)
         }

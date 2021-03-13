@@ -1,4 +1,4 @@
-import { ComponentOptions, ResultLink, IResultLinkOptions, IQueryResult, IResultsComponentBindings } from 'coveo-search-ui';
+import { ComponentOptions, ResultLink, IResultLinkOptions, IQueryResult, IResultsComponentBindings, IBuildingQueryEventArgs, QueryEvents } from 'coveo-search-ui';
 import { component, requiresFields } from '@coveops/turbo-core';
 import { ResultLinkTarget } from './enum';
 import { TabOpenerStrategyResolver } from './resolver';
@@ -17,8 +17,8 @@ export interface ISalesforceConsoleResultLinkOptions extends IResultLinkOptions 
     applyToQuickviews?: boolean;
 }
 
-@requiresFields(...SalesforceConsoleResultLink.fields)
 @component
+@requiresFields(...SalesforceConsoleResultLink.fields)
 export class SalesforceConsoleResultLink extends ResultLink {
     static ID = 'SalesforceConsoleResultLink';
 
@@ -125,24 +125,29 @@ export class SalesforceConsoleResultLink extends ResultLink {
     constructor(public element: HTMLElement, public options: ISalesforceConsoleResultLinkOptions, public bindings: IResultsComponentBindings, public result: IQueryResult) {
         super(element, ComponentOptions.initComponentOptions(element, SalesforceConsoleResultLink, options), bindings, result);
 
+        //Known issue that the Initialization won't always accept the fields
+        this.bind.onRootElement(QueryEvents.doneBuildingQuery, (args: IBuildingQueryEventArgs) => {
+            args.queryBuilder.addFieldsToInclude(SalesforceConsoleResultLink.fields);
+        });
+
         if (this.options.applyToQuickviews) {
             this.adjustQuickviews();
         }
     }
 
     protected bindEventToOpen() {
-        if (!this.options.workspaceAPI) {
-            console.log('ConsoleResultLink: workspaceAPI is null, binding ResultLink open instead.');
-            return super.bindEventToOpen();
-        }
-
         if (!this.options.openInPrimaryTab && !this.options.openInSubTab) {
             console.log('ConsoleResultLink: Neither the openInPrimaryTab nor openInSubTab are set, defaulting to ResultLink behavior.');
             return super.bindEventToOpen();
         }
 
-        const strategy = this.chooseStrategy();
-        this.element.onclick = async () => this.openItem(strategy);
+        try {
+            const strategy = this.chooseStrategy();
+            this.element.onclick = async () => this.handleClick(strategy);
+        } catch(e) {
+            console.log(e.message);
+            return super.bindEventToOpen();
+        }
 
         return true;
     }
@@ -153,6 +158,10 @@ export class SalesforceConsoleResultLink extends ResultLink {
             hrefTemplate: this.options.hrefTemplate,
             tabLabelTemplate: this.options.tabLabelTemplate
         });
+    }
+
+    protected async handleClick(strategy?: ISalesforceTabOpenerStrategy) {
+        await this.openItem(strategy);
     }
 
     protected async openItem(strategy: ISalesforceTabOpenerStrategy) {
