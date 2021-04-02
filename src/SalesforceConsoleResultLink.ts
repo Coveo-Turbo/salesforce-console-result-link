@@ -1,4 +1,4 @@
-import { ComponentOptions, ResultLink, IResultLinkOptions, IQueryResult, IResultsComponentBindings, IBuildingQueryEventArgs, QueryEvents } from 'coveo-search-ui';
+import { ComponentOptions, ResultLink, IResultLinkOptions, IQueryResult, IResultsComponentBindings, IBuildingQueryEventArgs, QueryEvents, AnalyticsEvents, IChangeAnalyticsCustomDataEventArgs, Quickview } from 'coveo-search-ui';
 import { component, requiresFields } from '@coveops/turbo-core';
 import { ResultLinkTarget } from './enum';
 import { TabOpenerStrategyResolver } from './resolver';
@@ -15,6 +15,7 @@ export interface ISalesforceConsoleResultLinkOptions extends IResultLinkOptions 
     workspaceAPI?: Aura.WorkspaceAPI;
 
     applyToQuickviews?: boolean;
+    closeQuickviewOnClick?: boolean;
 }
 
 @component
@@ -48,7 +49,7 @@ export class SalesforceConsoleResultLink extends ResultLink {
          *
          * Default value is `${clickUri}`.
          */
-        hrefTemplate: ComponentOptions.buildStringOption({defaultValue: '${clickUri}'}),
+        hrefTemplate: ComponentOptions.buildStringOption({ defaultValue: '${clickUri}' }),
 
         /**
          * Specifies a template literal from which to generate the `ResultLink` display title (see
@@ -118,6 +119,8 @@ export class SalesforceConsoleResultLink extends ResultLink {
         workspaceAPI: ComponentOptions.buildCustomOption(() => null, { defaultValue: null, required: true }),
 
         applyToQuickviews: ComponentOptions.buildBooleanOption(),
+
+        closeQuickviewOnClick: ComponentOptions.buildBooleanOption({ defaultValue: true }),
     };
 
     static fields = ['sfkbid', 'sfkavid', 'sfid'];
@@ -144,7 +147,7 @@ export class SalesforceConsoleResultLink extends ResultLink {
         try {
             const strategy = this.chooseStrategy();
             this.element.onclick = async () => this.handleClick(strategy);
-        } catch(e) {
+        } catch (e) {
             console.log(e.message);
             return super.bindEventToOpen();
         }
@@ -169,7 +172,7 @@ export class SalesforceConsoleResultLink extends ResultLink {
 
         try {
             await strategy.openInTab(target);
-        } catch(err) {
+        } catch (err) {
             console.error(err)
         }
     }
@@ -187,6 +190,10 @@ export class SalesforceConsoleResultLink extends ResultLink {
     }
 
     protected adjustQuickviews() {
+        if (this.options.closeQuickviewOnClick) {
+            this.bind.onRootElement(AnalyticsEvents.changeAnalyticsCustomData, this.handleChangeAnalyticsCustomData);
+        }
+
         ConfigureQuickviewHeader({
             resultLinkClass: 'SalesforceConsoleResultLink',
             resultLinkOptions: {
@@ -194,5 +201,20 @@ export class SalesforceConsoleResultLink extends ResultLink {
                 ...this.options,
             }
         });
+    }
+
+    private handleChangeAnalyticsCustomData(data: IChangeAnalyticsCustomDataEventArgs) {
+        const closeAfterMilliSeconds = 1000;
+        if (data.actionCause == Coveo.analyticsActionCauseList.documentOpen.name) {
+            const quickviewElements = this.root.querySelectorAll('.CoveoQuickview');
+
+            for (let i = 0; i < quickviewElements.length; ++i) {
+                const qv = Coveo.get(quickviewElements[i] as HTMLElement, 'Quickview') as Quickview;
+
+                setTimeout(() => {
+                    qv.close();
+                }, closeAfterMilliSeconds);  // Need to add a delay otherwise the quickview modal will close before the document opens.
+            }
+        }
     }
 }

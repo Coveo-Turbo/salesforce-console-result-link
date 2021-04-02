@@ -76,6 +76,12 @@ To replace the ResultLink in Quickview headers as well:
 <a class="CoveoSalesforceConsoleResultLink" data-open-in-sub-tab="true" data-apply-to-quickviews="true"></a>
 ```
 
+To replace the ResultLink in Quickview headers and not have Quickviews close when the link is clicked as well:
+
+```html
+<a class="CoveoSalesforceConsoleResultLink" data-open-in-sub-tab="true" data-apply-to-quickviews="true" data-close-quickview-on-click="false"></a>
+```
+
 ## Options 
 
 | Field | Type | Default | Description |
@@ -88,6 +94,7 @@ To replace the ResultLink in Quickview headers as well:
 | alwaysOpenInNewWindow | boolean | true | Specifies whether the result link should open in a new browser tab. This option only applies if the environment isn't compatible with the workforceAPI or the `openInPrimaryTab` option is set to `false`. |
 | workspaceAPI | workspaceAPI |  | The Salesforce workspaceAPI must be passed to the component at initialization. If it is not, the component will fallback to the `ResultLink` |
 | applyToQuickviews | boolean | false | Specifies whether the ResultLink in Quickview headers should be replaced with the `SalesforceConsoleResultLink` |
+| closeQuickviewOnClick | boolean | true | Specifies whether the Quickview should close when the link is clicked. Requires `applyToQuickviews` option to be `true`. |
 
 ## Installation in Salesforce
 
